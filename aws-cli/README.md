@@ -1,5 +1,9 @@
 # AWS Command Line Interface
 
+- [AWS Command Line Interface](#aws-command-line-interface)
+  - [Install](#install)
+  - [Configure](#configure)
+
 ## Install
 
 ```sh
@@ -19,6 +23,8 @@ aws help
 ```
 
 ## Configure
+
+`aws` 명령어를 사용하려면 구성(configure)이 필요하다.
 
 - IAM > Secrutiy Credentials (보안 자격 증명)
   - Access keys (access key ID and secret access key)
@@ -45,6 +51,8 @@ sh> cat ~/.aws/credentials
 aws_access_key_id = ${ACCESS_KEY_ID}
 aws_secret_access_key = ${SECRET_ACCESS_KEY}
 ```
+
+구성이 끝났으면 STS(Security Token Service)로 identity를 확인해본다.
 
 ```sh
 # IAM 사용자라면 조금 다르게 표시된다.
