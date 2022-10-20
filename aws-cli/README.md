@@ -20,7 +20,7 @@ aws help
 
 ## Configure
 
-- Secrutiy Credentials
+- IAM > Secrutiy Credentials (보안 자격 증명)
   - Access keys (access key ID and secret access key)
   - Create a new access key
 
