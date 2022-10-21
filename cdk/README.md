@@ -8,8 +8,9 @@
     - [Python 3](#python-3)
   - [Lambda with CDK](#lambda-with-cdk)
   - [Diff](#diff)
-  - [Synthesizes](#synthesizes)
-  - [Deploy](#deploy)
+  - [AWS CloudFormation 템플릿 생성](#aws-cloudformation-템플릿-생성)
+  - [AWS CloudFormation 템플릿 배포](#aws-cloudformation-템플릿-배포)
+  - [리소스 정리](#리소스-정리)
 
 ## Prerequisites
 
@@ -127,85 +128,70 @@ class CdkDemoStack(Stack):
 
 ## Diff
 
+기존에 배포된 스택과 현재 스택의 차이점을 확인한다.
+
 ```sh
 cdk diff
 ```
 
 ```sh
 Stack CdkDemoStack
-┌───┬──────────────────────────────────────────┬────────┬────────────────┬──────────────────────────────┬───────────┐
-│   │ Resource                                 │ Effect │ Action         │ Principal                    │ Condition │
-├───┼──────────────────────────────────────────┼────────┼────────────────┼──────────────────────────────┼───────────┤
-│ + │ ${CdkDemoLambdaFunction/ServiceRole.Arn} │ Allow  │ sts:AssumeRole │ Service:lambda.amazonaws.com │           │
-└───┴──────────────────────────────────────────┴────────┴────────────────┴──────────────────────────────┴───────────┘
-IAM Policy Changes
-┌───┬──────────────────────────────────────┬────────────────────────────────────────────────────────────────────────────────┐
-│   │ Resource                             │ Managed Policy ARN                                                             │
-├───┼──────────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────┤
-│ + │ ${CdkDemoLambdaFunction/ServiceRole} │ arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole │
-└───┴──────────────────────────────────────┴────────────────────────────────────────────────────────────────────────────────┘
-(NOTE: There may be security-related changes not in this list. See https://github.com/aws/aws-cdk/issues/1299)
-
-Parameters
-[+] Parameter BootstrapVersion BootstrapVersion: {"Type":"AWS::SSM::Parameter::Value<String>","Default":"/cdk-bootstrap/hnb659fds/version","Description":"Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"}
-
-Conditions
-[+] Condition CDKMetadata/Condition CDKMetadataAvailable: {"Fn::Or":[{"Fn::Or":[{"Fn::Equals":[{"Ref":"AWS::Region"},"af-south-1"]},{"Fn::Equals":[{"Ref":"AWS::Region"},"ap-east-1"]},{"Fn::Equals":[{"Ref":"AWS::Region"},"ap-northeast-1"]},{"Fn::Equals":[{"Ref":"AWS::Region"},"ap-northeast-2"]},{"Fn::Equals":[{"Ref":"AWS::Region"},"ap-south-1"]},{"Fn::Equals":[{"Ref":"AWS::Region"},"ap-southeast-1"]},{"Fn::Equals":[{"Ref":"AWS::Region"},"ap-southeast-2"]},{"Fn::Equals":[{"Ref":"AWS::Region"},"ca-central-1"]},{"Fn::Equals":[{"Ref":"AWS::Region"},"cn-north-1"]},{"Fn::Equals":[{"Ref":"AWS::Region"},"cn-northwest-1"]}]},{"Fn::Or":[{"Fn::Equals":[{"Ref":"AWS::Region"},"eu-central-1"]},{"Fn::Equals":[{"Ref":"AWS::Region"},"eu-north-1"]},{"Fn::Equals":[{"Ref":"AWS::Region"},"eu-south-1"]},{"Fn::Equals":[{"Ref":"AWS::Region"},"eu-west-1"]},{"Fn::Equals":[{"Ref":"AWS::Region"},"eu-west-2"]},{"Fn::Equals":[{"Ref":"AWS::Region"},"eu-west-3"]},{"Fn::Equals":[{"Ref":"AWS::Region"},"me-south-1"]},{"Fn::Equals":[{"Ref":"AWS::Region"},"sa-east-1"]},{"Fn::Equals":[{"Ref":"AWS::Region"},"us-east-1"]},{"Fn::Equals":[{"Ref":"AWS::Region"},"us-east-2"]}]},{"Fn::Or":[{"Fn::Equals":[{"Ref":"AWS::Region"},"us-west-1"]},{"Fn::Equals":[{"Ref":"AWS::Region"},"us-west-2"]}]}]}
 
 Resources
-[+] AWS::IAM::Role CdkDemoLambdaFunction/ServiceRole CdkDemoLambdaFunctionServiceRole43ACA25F 
-[+] AWS::Lambda::Function CdkDemoLambdaFunction CdkDemoLambdaFunctionBB73AF9F 
-
-Other Changes
-[+] Unknown Rules: {"CheckBootstrapVersion":{"Assertions":[{"Assert":{"Fn::Not":[{"Fn::Contains":[["1","2","3","4","5"],{"Ref":"BootstrapVersion"}]}]},"AssertDescription":"CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."}]}}
+[~] AWS::Lambda::Function CdkDemoLambdaFunction CdkDemoLambdaFunctionBB73AF9F 
+ ├─ [~] Code
+ │   └─ [~] .S3Key:
+ │       ├─ [-] f0520ac3db79d59f99f5775cc2a3e9d86613fc281757da6e1c85ae50e12e967e.zip
+ │       └─ [+] 589d074650b92e5f2a10a3ccf52aadf3ad03a3b8c5aac0b9f1c02b2c9a2173c5.zip
+ └─ [~] Metadata
+     └─ [~] .aws:asset:path:
+         ├─ [-] asset.f0520ac3db79d59f99f5775cc2a3e9d86613fc281757da6e1c85ae50e12e967e
+         └─ [+] asset.589d074650b92e5f2a10a3ccf52aadf3ad03a3b8c5aac0b9f1c02b2c9a2173c5
 ```
 
-## Synthesizes
+## AWS CloudFormation 템플릿 생성
 
-- 의미
+- 기능
+  - CDK 스택을 CloudFormation 스택으로 변환해서 출력한다.
+- Synthesizes 의미
   - ...을 종합[통합]하다; ...을 종합적으로 다루다.
   - [화학] [구성 성분을] 합성하다; ...을 (합성해서) 만들다.
-- 기능
-  - CDK 앱에서 정의하는 구문에 대한 AWS CloudFormation 템플릿을 생성해서 터미널에 출력한다.
 
 ```sh
 cdk synth
 ```
 
-## Deploy
+## AWS CloudFormation 템플릿 배포
 
 ```sh
 cdk deploy
 ```
 
 ```sh
-<aws_cdk.aws_events.Rule object at 0x7fa5fcc2a110>
+<aws_cdk.aws_events.Rule object at 0x7ffaf5ca2c20>
 
-✨  Synthesis time: 4.16s
+✨  Synthesis time: 4.35s
 
 CdkDemoStack: building assets...
 
 CdkDemoStack: assets built
 
-IAM Statement Changes
-┌───┬───────────────────────────────┬────────┬───────────────────────────────┬───────────────────────────────┬──────────────────────────────────┐
-│   │ Resource                      │ Effect │ Action                        │ Principal                     │ Condition                        │
-├───┼───────────────────────────────┼────────┼───────────────────────────────┼───────────────────────────────┼──────────────────────────────────┤
-│ + │ ${CdkDemoLambdaFunction.Arn}  │ Allow  │ lambda:InvokeFunction         │ Service:events.amazonaws.com  │ "ArnLike": {                     │
-│   │                               │        │                               │                               │   "AWS:SourceArn": "${CdkDemoEve │
-│   │                               │        │                               │                               │ ntRule.Arn}"                     │
-│   │                               │        │                               │                               │ }                                │
-├───┼───────────────────────────────┼────────┼───────────────────────────────┼───────────────────────────────┼──────────────────────────────────┤
-│ + │ ${CdkDemoLambdaFunction/Servi │ Allow  │ sts:AssumeRole                │ Service:lambda.amazonaws.com  │                                  │
-│   │ ceRole.Arn}                   │        │                               │                               │                                  │
-└───┴───────────────────────────────┴────────┴───────────────────────────────┴───────────────────────────────┴──────────────────────────────────┘
-IAM Policy Changes
-┌───┬──────────────────────────────────────┬────────────────────────────────────────────────────────────────────────────────┐
-│   │ Resource                             │ Managed Policy ARN                                                             │
-├───┼──────────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────┤
-│ + │ ${CdkDemoLambdaFunction/ServiceRole} │ arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole │
-└───┴──────────────────────────────────────┴────────────────────────────────────────────────────────────────────────────────┘
-(NOTE: There may be security-related changes not in this list. See https://github.com/aws/aws-cdk/issues/1299)
+CdkDemoStack: deploying...
 
-Do you wish to deploy these changes (y/n)? y
+CdkDemoStack: creating CloudFormation changeset...
+
+ ✅  CdkDemoStack
+
+✨  Deployment time: 27.01s
+
+Stack ARN:
+arn:aws:cloudformation:ap-northeast-2:123456789012:stack/CdkDemoStack/40e949b0-505b-11ed-8ccf-06e69a4e24e8
+
+✨  Total time: 31.36s
+```
+
+## 리소스 정리
+
+```sh
+cdk destroy
 ```
