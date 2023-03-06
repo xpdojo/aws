@@ -3,6 +3,7 @@
 - [Cloud Development Kit](#cloud-development-kit)
   - [Prerequisites](#prerequisites)
   - [AWS CDK Toolkit](#aws-cdk-toolkit)
+    - [Upgrade](#upgrade)
     - [Bootstrapping](#bootstrapping)
   - [create cdk app](#create-cdk-app)
     - [Python 3](#python-3)
@@ -30,6 +31,26 @@ sudo npm install -g aws-cdk
 ```sh
 cdk --version
 # 2.46.0 (build 5a0595e)
+```
+
+### Upgrade
+
+프로젝트 라이브러리 버전만 올리면 다음과 같은 오류가 발생할 수 있다.
+
+```sh
+Please upgrade the CLI to the latest version.
+(Cloud assembly schema version mismatch: Maximum schema version supported is 21.0.0, but found 30.1.0)
+```
+
+이 때는 `cdk`도 업그레이드가 필요하다.
+
+```sh
+sudo npm install -g aws-cdk@latest
+```
+
+```sh
+cdk --version
+# 2.67.0 (build b6f7f39)
 ```
 
 ### Bootstrapping
