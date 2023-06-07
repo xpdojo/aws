@@ -30,6 +30,8 @@ public class SqsPublisher {
 
     public void testClient() {
         final var queueName = "test-queue-dev";
+        // createQueue(queueName);
+
         GetQueueUrlResponse queueUrl = findQueueUrlByName(queueName);
         // listQueue(queueName);
 
@@ -97,7 +99,7 @@ public class SqsPublisher {
      * @deprecated Queue 생성은 콘솔에서 미리 할 것
      */
     @Deprecated
-    public String createQueue(SqsClient sqsClient, String queueName) {
+    public String createQueue(String queueName) {
         CreateQueueRequest createQueueRequest =
                 CreateQueueRequest.builder()
                         .queueName(queueName)
