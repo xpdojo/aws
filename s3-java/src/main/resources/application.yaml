@@ -1,0 +1,8 @@
+logging:
+  level:
+    root: debug
+
+cloud:
+  aws:
+    s3:
+      bucket: zealous-almighty-having-orgulous
