@@ -4,13 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.services.sqs.SqsClient;
-import software.amazon.awssdk.services.sqs.model.CreateQueueRequest;
-import software.amazon.awssdk.services.sqs.model.GetQueueUrlRequest;
 import software.amazon.awssdk.services.sqs.model.GetQueueUrlResponse;
-import software.amazon.awssdk.services.sqs.model.ListQueuesRequest;
-import software.amazon.awssdk.services.sqs.model.ListQueuesResponse;
 import software.amazon.awssdk.services.sqs.model.QueueAttributeName;
-import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 import software.amazon.awssdk.services.sqs.model.SendMessageResponse;
 
 import javax.annotation.PostConstruct;
@@ -33,10 +28,12 @@ public class SqsPublisher {
         // createQueue(queueName);
 
         GetQueueUrlResponse queueUrl = findQueueUrlByName(queueName);
+        log.debug("queueUrl={}", queueUrl);
         // listQueue(queueName);
 
         final var message = "Hello world!";
-        sendMessage(queueUrl, message);
+        SendMessageResponse sendMessageResponse = sendMessage(queueUrl, message);
+        log.debug("sendMessageResponse={}", sendMessageResponse);
 
         sqsClient.close();
     }
@@ -48,15 +45,9 @@ public class SqsPublisher {
      * @return 대기열 URL
      */
     private GetQueueUrlResponse findQueueUrlByName(String queueName) {
-        // Get the URL for a queue
-        GetQueueUrlRequest getQueueUrlRequest =
-                GetQueueUrlRequest.builder()
-                        .queueName(queueName)
-                        .build();
-        GetQueueUrlResponse queueUrl = sqsClient.getQueueUrl(getQueueUrlRequest);
-        log.debug("queueUrl={}", queueUrl);
-
-        return queueUrl;
+        return sqsClient.getQueueUrl(builder -> builder
+                .queueName(queueName)
+                .build());
     }
 
     /**
@@ -65,12 +56,12 @@ public class SqsPublisher {
      * @param queueName 대기열 이름
      */
     private void listQueue(final String queueName) {
-        ListQueuesRequest listQueuesRequest =
-                ListQueuesRequest.builder()
+        var response =
+                sqsClient.listQueues(builder -> builder
                         .queueNamePrefix(queueName)
-                        .build();
-        ListQueuesResponse listQueuesResponse = sqsClient.listQueues(listQueuesRequest);
-        for (String url : listQueuesResponse.queueUrls()) {
+                        .build());
+
+        for (String url : response.queueUrls()) {
             log.debug("listQueueUrl={}", url);
         }
     }
@@ -81,15 +72,11 @@ public class SqsPublisher {
      * @param queueUrl 대기열 URL
      * @param message  메시지
      */
-    private void sendMessage(GetQueueUrlResponse queueUrl, String message) {
-        SendMessageRequest sendMessage =
-                SendMessageRequest.builder()
-                        .queueUrl(queueUrl.queueUrl())
-                        .messageBody(message)
-                        .build();
-
-        SendMessageResponse sendMessageResponse = sqsClient.sendMessage(sendMessage);
-        log.debug("sendMessageResponse={}", sendMessageResponse);
+    private SendMessageResponse sendMessage(GetQueueUrlResponse queueUrl, String message) {
+        return sqsClient.sendMessage(builder -> builder
+                .queueUrl(queueUrl.queueUrl())
+                .messageBody(message)
+                .build());
     }
 
     /**
@@ -100,8 +87,7 @@ public class SqsPublisher {
      */
     @Deprecated
     public String createQueue(String queueName) {
-        CreateQueueRequest createQueueRequest =
-                CreateQueueRequest.builder()
+        return sqsClient.createQueue(builder -> builder
                         .queueName(queueName)
                         .attributes(
                                 new HashMap<>() {
@@ -111,12 +97,8 @@ public class SqsPublisher {
                                     }
                                 }
                         )
-                        .build();
-
-        sqsClient.createQueue(createQueueRequest);
-
-        GetQueueUrlResponse getQueueUrlResponse = sqsClient.getQueueUrl(GetQueueUrlRequest.builder().queueName(queueName).build());
-        return getQueueUrlResponse.queueUrl();
+                        .build())
+                .queueUrl();
     }
 
 }
