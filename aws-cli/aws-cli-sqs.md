@@ -1,4 +1,6 @@
-# SQS
+# Amazon SQS
+
+Amazon Simple Queue Service
 
 ```sh
 aws configure list-profiles

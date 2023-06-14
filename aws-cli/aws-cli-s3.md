@@ -1,4 +1,6 @@
-# S3
+# Amazon S3
+
+Amazon Simple Storage Service
 
 ```sh
 aws list-commands
