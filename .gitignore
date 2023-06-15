@@ -6,3 +6,5 @@
 ## JetBrains ##
 .idea/
 
+## Python ##
+venv/
