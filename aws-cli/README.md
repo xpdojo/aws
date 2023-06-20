@@ -2,12 +2,16 @@
 
 - [AWS Command Line Interface](#aws-command-line-interface)
   - [명령줄 도구 설치](#명령줄-도구-설치)
+    - [Linux](#linux)
     - [설치 확인](#설치-확인)
+    - [macOS](#macos)
   - [Configure](#configure)
     - [프로파일(Profile) 나누기](#프로파일profile-나누기)
     - [default 변경하기](#default-변경하기)
 
 ## 명령줄 도구 설치
+
+### Linux
 
 ```sh
 cd /tmp
@@ -34,6 +38,21 @@ aws --version
 
 ```sh
 aws help
+```
+
+### macOS
+
+```sh
+curl "https://awscli.amazonaws.com/AWSCLIV2.pkg" -o "AWSCLIV2.pkg"
+```
+
+```sh
+sudo installer -pkg AWSCLIV2.pkg -target /
+```
+
+```sh
+aws --version
+# aws-cli/2.12.1 Python/3.11.3 Darwin/22.5.0 exe/x86_64 prompt/off
 ```
 
 ## Configure
