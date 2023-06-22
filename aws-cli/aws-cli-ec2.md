@@ -1,8 +1,15 @@
 # EC2
 
 - [EC2](#ec2)
-  - [인스턴스 이름을 기준으로 리스팅](#인스턴스-이름을-기준으로-리스팅)
+  - [help](#help)
+  - [키 페어(Key pair) 관리](#키-페어key-pair-관리)
+    - [키 페어 생성](#키-페어-생성)
+    - [키 페어 조회](#키-페어-조회)
+    - [public key만 추출](#public-key만-추출)
+    - [로컬에 있는 키를 등록](#로컬에-있는-키를-등록)
+    - [키 페어 제거](#키-페어-제거)
   - [인스턴스 생성](#인스턴스-생성)
+  - [인스턴스 이름을 기준으로 리스팅](#인스턴스-이름을-기준으로-리스팅)
   - [Instance Profile은 생성 후 할당해도 됨](#instance-profile은-생성-후-할당해도-됨)
   - [인스턴스 생성 후 태그 추가](#인스턴스-생성-후-태그-추가)
   - [인스턴스 일시 중지](#인스턴스-일시-중지)
@@ -11,19 +18,97 @@
   - [인스턴스에 고정 IP(EIP, Elastic IP) 할당하기](#인스턴스에-고정-ipeip-elastic-ip-할당하기)
   - [참조](#참조)
 
+## help
+
 ```sh
 aws ec2 help
+```
+
+## 키 페어(Key pair) 관리
+
+### 키 페어 생성
+
+- [Create a key pair using Amazon EC2](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/create-key-pairs.html#having-ec2-create-your-key-pair)
+
+```sh
+aws ec2 create-key-pair \
+  --key-name my-key-pair \
+  --key-type ed25519 \
+  --query "KeyMaterial" \
+  --key-format pem \
+  --output text > my-key-pair.pem
+```
+
+### 키 페어 조회
+
+```sh
+aws ec2 describe-key-pairs --key-name my-key-pair --include-public-key
+```
+
+```json
+// response
+{
+    "KeyPairs": [
+        {
+            "KeyPairId": "key-071666eea9eb3d80b",
+            "KeyFingerprint": "8bEKkG1XmUyLfpioZADSL3xw7R7YchKUc1velSSLJmI=",
+            "KeyName": "my-key-pair",
+            "KeyType": "ed25519",
+            "Tags": [],
+            "PublicKey": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKaZ7+euMqXcICxcOuGSdwqJcqIrZxbpt4qVrnS1F91m my-key-pair",
+            "CreateTime": "2023-06-22T08:54:03.314000+00:00"
+        }
+    ]
+}
+```
+
+### public key만 추출
+
+```sh
+aws ec2 describe-key-pairs --key-name my-key-pair --include-public-key \
+  --query "KeyPairs[*].PublicKey" \
+  --output text > my-key-pair.pub
+```
+
+### 로컬에 있는 키를 등록
+
+```sh
+aws ec2 import-key-pair \
+  --key-name "my-key-pair" \
+  --public-key-material fileb://./my-key-pair.pub
+```
+
+### 키 페어 제거
+
+```sh
+aws ec2 delete-key-pair --key-name my-key-pair
+```
+
+## 인스턴스 생성
+
+- 앞서 생성한 키 페어 할당
+- 인스턴스 프로파일은 나중에 할당해도 됨
+- `ami-0c9c942bd7bf113a2`는 Ubuntu Server 22.04 LTS (HVM), SSD Volume Type, 64비트 (x86)
+
+```sh
+aws ec2 run-instances \
+  --image-id ami-0c9c942bd7bf113a2 \
+  --count 1 \
+  --instance-type t2.micro \
+  --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=demo-instance}]' \
+  --key-name my-key-pair \
+  --iam-instance-profile Name=$INSTANCE_PROFILE_NAME
 ```
 
 ## 인스턴스 이름을 기준으로 리스팅
 
 ```sh
-aws ec2 describe-instances --filters "Name=tag:Name,Values=*markruler*
+aws ec2 describe-instances --filters "Name=tag:Name,Values=*demo*
 ```
 
 ```sh
 aws ec2 describe-instances \
-  --filters "Name=tag:Name,Values=*markruler*" \
+  --filters "Name=tag:Name,Values=*demo*" \
   --query "Reservations[*].Instances[*].{Name:Tags[?Key=='Name']|[0].Value,InstanceProfile:IamInstanceProfile.Arn}" \
   --output json
 ```
@@ -32,8 +117,8 @@ aws ec2 describe-instances \
 [
     [
         {
-            "Name": "markruler-apiserver-dev",
-            "InstanceProfile": "arn:aws:iam::123456789012:instance-profile/markruler-instnace-profile"
+            "Name": "demo-instance",
+            "InstanceProfile": "arn:aws:iam::123456789012:instance-profile/$INSTANCE_PROFILE_NAME"
         }
     ]
 ]
@@ -41,29 +126,20 @@ aws ec2 describe-instances \
 
 ```sh
 aws ec2 describe-instances \
-  --filters "Name=tag:Name,Values=*markruler*" \
+  --filters "Name=tag:Name,Values=*demo*" \
   --query "Reservations[*].Instances[*].{Instance:InstanceId,Name:Tags[?Key=='Name']|[0].Value,State:State.Name}" \
   --output table
 ```
 
 ```text
---------------------------------------------------------------
-|                      DescribeInstances                     |
-+----------------------+--------------------------+----------+
-|       Instance       |          Name            |  State   |
-+----------------------+--------------------------+----------+
-|  i-0869b56d7dd263ee0 |  winipass-apiserver-dev  |  running |
-+----------------------+--------------------------+----------+
-```
-
-## 인스턴스 생성
-
-```sh
-aws ec2 run-instances \
-  --image-id ami-abc12345 \
-  --count 1 \
-  --instance-type t2.micro \
-  --iam-instance-profile Name=$INSTANCE_PROFILE_NAME
+--------------------------------------------------------
+|                   DescribeInstances                  |
++---------------------+-----------------+--------------+
+|      Instance       |      Name       |    State     |
++---------------------+-----------------+--------------+
+|  i-0054ddf98d59192fa|  demo-instance  |  running     |
+|  i-095f7191ca957750c|  demo-instance  |  terminated  |
++---------------------+-----------------+--------------+
 ```
 
 ## Instance Profile은 생성 후 할당해도 됨
@@ -114,6 +190,24 @@ aws ec2 start-instances --instance-ids i-1234567890abcdef0
 
 ```sh
 aws ec2 terminate-instances --instance-ids i-1234567890abcdef0
+```
+
+```json
+{
+    "TerminatingInstances": [
+        {
+            "CurrentState": {
+                "Code": 32,
+                "Name": "shutting-down"
+            },
+            "InstanceId": "i-095f7191ca957750c",
+            "PreviousState": {
+                "Code": 16,
+                "Name": "running"
+            }
+        }
+    ]
+}
 ```
 
 ## 인스턴스에 고정 IP(EIP, Elastic IP) 할당하기
