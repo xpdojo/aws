@@ -25,13 +25,8 @@ aws sqs list-queues
 ```json
 {
     "QueueUrls": [
-        "https://sqs.ap-northeast-2.amazonaws.com/092740280445/Autowini_CarDetailsLog",
-        "https://sqs.ap-northeast-2.amazonaws.com/092740280445/Autowini_ItemDetailsUpdate.fifo",
-        "https://sqs.ap-northeast-2.amazonaws.com/092740280445/Autowini_SalesStatusUpdate",
-        "https://sqs.ap-northeast-2.amazonaws.com/092740280445/Autowini_TruckDetailsLog",
-        "https://sqs.ap-northeast-2.amazonaws.com/092740280445/auctionwini-image-convert-queue",
-        "https://sqs.ap-northeast-2.amazonaws.com/092740280445/auctionwini-server-call-queue",
-        "https://sqs.ap-northeast-2.amazonaws.com/092740280445/winipass-queue-dev"
+        "https://sqs.ap-northeast-2.amazonaws.com/123456789012/queue-name1",
+        "https://sqs.ap-northeast-2.amazonaws.com/123456789012/queue-name2"
     ]
 }
 ```
@@ -41,7 +36,7 @@ aws sqs list-queues
 ```sh
 # aws sqs send-message --queue-url <queue-url> --message-body <message-body>
 aws sqs send-message \
-  --queue-url "https://sqs.ap-northeast-2.amazonaws.com/092740280445/winipass-queue-dev" \
+  --queue-url "https://sqs.ap-northeast-2.amazonaws.com/123456789012/queue-name1" \
   --message-body "Hello World"
 ```
 
@@ -56,7 +51,7 @@ aws sqs send-message \
 
 ```sh
 # aws sqs receive-message --queue-url <queue-url>
-aws sqs receive-message --queue-url https://sqs.ap-northeast-2.amazonaws.com/092740280445/winipass-queue-dev
+aws sqs receive-message --queue-url https://sqs.ap-northeast-2.amazonaws.com/123456789012/queue-name1
 ```
 
 ```json
@@ -78,5 +73,7 @@ aws sqs receive-message --queue-url https://sqs.ap-northeast-2.amazonaws.com/092
 
 ```sh
 # aws sqs delete-message --queue-url <queue-url> --receipt-handle <receipt-handle>
-aws sqs delete-message --queue-url https://sqs.ap-northeast-2.amazonaws.com/092740280445/winipass-queue-dev --receipt-handle AQEB4JPoKuRBtgJrxL6fLHoQ3RhUY32dcNXwhqQzRQD5cl6cnDbO/Hceq6qnRzCMIhsOjhzO+GBBERWNMbogRTzdVQoTL6DGRUjXiCbhT2ARMxXmFoOmVbSvF1qg60upkNLmf58T6RSHeIwl9tm2FaWSJ3SQKFDnsuajJstucUEi7Hm7WULFrFMrTvLdMmLq9vmZb4LrEZskEX3KoGsaLdGxUHKbU9mU837UNL6I84jbhZMngXSpW/D4mX1M6gUEGVsLbUPS/IlLvMLNeSBKsw1S+8V2+IIuq8Rtg4roFcZHJzcwTbImOmTbSS5sbS65f5IAVd1xV0TdwpbvqBq/Ydxs/UtjRbRHw2S7LMKhNH/COwaOJGMnabkbbu5phwwbhraSQBHk8RBE5mvqp0RbkAUup7A7hACwbS3ahPRpU8qjv6I=
+aws sqs delete-message \
+    --queue-url https://sqs.ap-northeast-2.amazonaws.com/123456789012/queue-name1 \
+    --receipt-handle AQEB4JPoKuRBtgJrxL6fLHoQ3RhUY32dcNXwhqQzRQD5cl6cnDbO/Hceq6qnRzCMIhsOjhzO+GBBERWNMbogRTzdVQoTL6DGRUjXiCbhT2ARMxXmFoOmVbSvF1qg60upkNLmf58T6RSHeIwl9tm2FaWSJ3SQKFDnsuajJstucUEi7Hm7WULFrFMrTvLdMmLq9vmZb4LrEZskEX3KoGsaLdGxUHKbU9mU837UNL6I84jbhZMngXSpW/D4mX1M6gUEGVsLbUPS/IlLvMLNeSBKsw1S+8V2+IIuq8Rtg4roFcZHJzcwTbImOmTbSS5sbS65f5IAVd1xV0TdwpbvqBq/Ydxs/UtjRbRHw2S7LMKhNH/COwaOJGMnabkbbu5phwwbhraSQBHk8RBE5mvqp0RbkAUup7A7hACwbS3ahPRpU8qjv6I=
 ```
