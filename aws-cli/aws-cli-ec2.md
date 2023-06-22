@@ -9,6 +9,7 @@
     - [로컬에 있는 키를 등록](#로컬에-있는-키를-등록)
     - [키 페어 제거](#키-페어-제거)
   - [인스턴스 생성](#인스턴스-생성)
+  - [대상 그룹(Target Group) 생성](#대상-그룹target-group-생성)
   - [인스턴스 이름을 기준으로 리스팅](#인스턴스-이름을-기준으로-리스팅)
   - [Instance Profile은 생성 후 할당해도 됨](#instance-profile은-생성-후-할당해도-됨)
   - [인스턴스 생성 후 태그 추가](#인스턴스-생성-후-태그-추가)
@@ -95,9 +96,23 @@ aws ec2 run-instances \
   --image-id ami-0c9c942bd7bf113a2 \
   --count 1 \
   --instance-type t2.micro \
+  # 아래는 모두 선택 사항
   --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=demo-instance}]' \
   --key-name my-key-pair \
+  --subnet-id subnet-12345678901234567 \
+  --security-group-ids sg-12345678901234567 \
   --iam-instance-profile Name=$INSTANCE_PROFILE_NAME
+```
+
+## 대상 그룹(Target Group) 생성
+
+```sh
+aws elbv2 create-target-group \
+  --name demo-target-group \
+  --protocol HTTP \
+  --port 80 \
+  --target-type instance \
+  --vpc-id vpc-12345678901234567
 ```
 
 ## 인스턴스 이름을 기준으로 리스팅
