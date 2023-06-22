@@ -12,7 +12,26 @@ aws list-commands
 aws s3 help
 ```
 
-# S3 버킷 생성
+## S3 버킷 리스팅
+
+```sh
+aws s3 ls
+# 2023-06-19 15:04:14 my-s3-bucket1
+# 2023-06-13 17:23:47 my-s3-bucket2
+```
+
+```sh
+aws s3 ls s3://my-s3-bucket1 --recursive --human-readable --summarize
+# 2023-06-21 18:04:25   86.6 MiB 12a8493d25ab35a37d8ab772702825a3c3bb834f.zip
+# 2023-06-20 15:22:36   86.6 MiB 18aa72f06900cacb96ef2e1eb1bca0c1de068154.zip
+# 2023-06-21 09:27:05   86.7 MiB 32dc128d378f971ee79f30152b59e057286a21cb.zip
+# 2023-06-20 18:46:29   86.7 MiB 3f6fa22ffa8740aaa480785e02ab98db90c6a2af.zip
+# ...
+# Total Objects: 20
+#    Total Size: 1.7 GiB
+```
+
+## S3 버킷 생성
 
 ```sh
 aws s3 mb help
