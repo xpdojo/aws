@@ -9,7 +9,9 @@
     - [로컬에 있는 키를 등록](#로컬에-있는-키를-등록)
     - [키 페어 제거](#키-페어-제거)
   - [인스턴스 생성](#인스턴스-생성)
+  - [인스턴스 조회](#인스턴스-조회)
   - [대상 그룹(Target Group) 생성](#대상-그룹target-group-생성)
+  - [Target Group 조회](#target-group-조회)
   - [인스턴스 이름을 기준으로 리스팅](#인스턴스-이름을-기준으로-리스팅)
   - [Instance Profile은 생성 후 할당해도 됨](#instance-profile은-생성-후-할당해도-됨)
   - [인스턴스 생성 후 태그 추가](#인스턴스-생성-후-태그-추가)
@@ -43,6 +45,12 @@ aws ec2 create-key-pair \
 ### 키 페어 조회
 
 ```sh
+# 전체 키 페어 조회
+aws ec2 describe-key-pairs
+```
+
+```sh
+# 특정 키 페어 조회
 aws ec2 describe-key-pairs --key-name my-key-pair --include-public-key
 ```
 
@@ -66,7 +74,9 @@ aws ec2 describe-key-pairs --key-name my-key-pair --include-public-key
 ### public key만 추출
 
 ```sh
-aws ec2 describe-key-pairs --key-name my-key-pair --include-public-key \
+aws ec2 describe-key-pairs \
+  --key-name my-key-pair \
+  --include-public-key \
   --query "KeyPairs[*].PublicKey" \
   --output text > my-key-pair.pub
 ```
@@ -94,14 +104,20 @@ aws ec2 delete-key-pair --key-name my-key-pair
 ```sh
 aws ec2 run-instances \
   --image-id ami-0c9c942bd7bf113a2 \
-  --count 1 \
+  --count 2 \
   --instance-type t2.micro \
   # 아래는 모두 선택 사항
-  --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=demo-instance}]' \
+  --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=demo-instance},{Key=env,Value=production}]' 'ResourceType=volume,Tags=[{Key=Name,Value=demo-volume}]' \
   --key-name my-key-pair \
   --subnet-id subnet-12345678901234567 \
   --security-group-ids sg-12345678901234567 \
   --iam-instance-profile Name=$INSTANCE_PROFILE_NAME
+```
+
+## 인스턴스 조회
+
+```sh
+aws ec2 describe-instances
 ```
 
 ## 대상 그룹(Target Group) 생성
@@ -110,9 +126,15 @@ aws ec2 run-instances \
 aws elbv2 create-target-group \
   --name demo-target-group \
   --protocol HTTP \
-  --port 80 \
+  --port $APPLICATION_PORT \
   --target-type instance \
   --vpc-id vpc-12345678901234567
+```
+
+## Target Group 조회
+
+```sh
+aws elbv2 describe-target-groups
 ```
 
 ## 인스턴스 이름을 기준으로 리스팅
@@ -159,13 +181,19 @@ aws ec2 describe-instances \
 
 ## Instance Profile은 생성 후 할당해도 됨
 
-- Instance Profile 생성
+Instance Profile 생성
 
 ```sh
 aws iam create-instance-profile --instance-profile-name $INSTANCE_PROFILE_NAME
 ```
 
-- Instance Profile에 Role 할당
+생성한 Instance Profile 조회
+
+```sh
+aws iam list-instance-profiles
+```
+
+Instance Profile에 Role 할당
 
 ```sh
 aws iam add-role-to-instance-profile \
@@ -173,7 +201,7 @@ aws iam add-role-to-instance-profile \
   --instance-profile-name $INSTANCE_PROFILE_NAME
 ```
 
-- EC2 인스턴스에 Instance Profile 할당
+EC2 인스턴스에 Instance Profile 할당
 
 ```sh
 aws ec2 associate-iam-instance-profile \
