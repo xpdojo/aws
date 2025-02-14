@@ -19,7 +19,7 @@ Show how to use AWS SDK for Python (Boto3) with Amazon Simple Storage Service
 """
 
 logger = logging.getLogger(__name__)
-bucket_name = 'your_bucket'
+BUCKET_NAME = 'your_bucket'
 
 
 # snippet-start:[python.example_code.s3.helper.ObjectWrapper]
@@ -58,11 +58,11 @@ class ObjectWrapper:
             self.object.wait_until_exists()
             logger.info(
                 "Put object '%s' to bucket '%s'.", self.object.key,
-                self.object.bucket_name)
+                self.object.BUCKET_NAME)
         except ClientError:
             logger.exception(
                 "Couldn't put object '%s' to bucket '%s'.", self.object.key,
-                self.object.bucket_name)
+                self.object.BUCKET_NAME)
             raise
         finally:
             if getattr(put_data, 'close', None):
@@ -81,11 +81,11 @@ class ObjectWrapper:
             body = self.object.get()['Body'].read()
             logger.info(
                 "Got object '%s' from bucket '%s'.",
-                self.object.key, self.object.bucket_name)
+                self.object.key, self.object.BUCKET_NAME)
         except ClientError:
             logger.exception(
                 "Couldn't get object '%s' from bucket '%s'.",
-                self.object.key, self.object.bucket_name)
+                self.object.key, self.object.BUCKET_NAME)
             raise
         else:
             return body
@@ -127,19 +127,19 @@ class ObjectWrapper:
         """
         try:
             dest_object.copy_from(CopySource={
-                'Bucket': self.object.bucket_name,
+                'Bucket': self.object.BUCKET_NAME,
                 'Key': self.object.key
             })
             dest_object.wait_until_exists()
             logger.info(
                 "Copied object from %s:%s to %s:%s.",
-                self.object.bucket_name, self.object.key,
-                dest_object.bucket_name, dest_object.key)
+                self.object.BUCKET_NAME, self.object.key,
+                dest_object.BUCKET_NAME, dest_object.key)
         except ClientError:
             logger.exception(
                 "Couldn't copy object from %s/%s to %s/%s.",
-                self.object.bucket_name, self.object.key,
-                dest_object.bucket_name, dest_object.key)
+                self.object.BUCKET_NAME, self.object.key,
+                dest_object.BUCKET_NAME, dest_object.key)
             raise
 
     # snippet-end:[python.example_code.s3.CopyObject]
@@ -154,11 +154,11 @@ class ObjectWrapper:
             self.object.wait_until_not_exists()
             logger.info(
                 "Deleted object '%s' from bucket '%s'.",
-                self.object.key, self.object.bucket_name)
+                self.object.key, self.object.BUCKET_NAME)
         except ClientError:
             logger.exception(
                 "Couldn't delete object '%s' from bucket '%s'.",
-                self.object.key, self.object.bucket_name)
+                self.object.key, self.object.BUCKET_NAME)
             raise
 
     # snippet-end:[python.example_code.s3.DeleteObject]

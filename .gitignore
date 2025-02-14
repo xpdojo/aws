@@ -8,5 +8,9 @@
 
 ## Python ##
 venv/
+.venv/
 
 private/
+*.log
+*.log.swp
+
