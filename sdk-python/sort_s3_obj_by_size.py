@@ -1,5 +1,6 @@
 from collections import defaultdict
 from pprint import pprint
+import datetime
 
 import boto3
 
@@ -48,19 +49,28 @@ def list_incomplete_multipart_uploads(bucket_name):
 
 
 if __name__ == '__main__':
-    folder_sizes = get_folder_sizes(BUCKET_NAME)
-    if not folder_sizes:
-        print("No folders to display.")
-    for folder, info in folder_sizes:
-        size_mib = info['size'] / (1024 * 1024)
-        pprint(
-            f'Folder: {folder}, Size: {info["size"]} bytes ({size_mib:.2f} MiB), Last Modified: {info["last_modified"]}')
+    # 스크립트 이름과 현재 날짜/시간을 포함한 로그 파일 생성
+    current_datetime = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+    log_filename = __file__.replace('.py', f'-{current_datetime}.log')
+    
+    with open(log_filename, 'w') as log_file:
+        folder_sizes = get_folder_sizes(BUCKET_NAME)
+        if not folder_sizes:
+            log_file.write("No folders to display.\n")
+        for folder, info in folder_sizes:
+            size_mib = info['size'] / (1024 * 1024)
+            log_message = f'Folder: {folder}, Size: {info["size"]} bytes ({size_mib:.2f} MiB), Last Modified: {info["last_modified"]}\n'
+            log_file.write(log_message)
+            print(log_message, end='')  # 콘솔에도 출력
 
-    incomplete_uploads_list = list_incomplete_multipart_uploads(BUCKET_NAME)
-    if not incomplete_uploads_list:
-        print("No incomplete multipart uploads found.")
-    else:
-        print("⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠ Incomplete multipart uploads:")
-        for incomplete_upload in incomplete_uploads_list:
-            pprint(
-                f'Key: {incomplete_upload["Key"]}, UploadId: {incomplete_upload["UploadId"]}, Initiated: {incomplete_upload["Initiated"]}')
+        incomplete_uploads_list = list_incomplete_multipart_uploads(BUCKET_NAME)
+        if not incomplete_uploads_list:
+            log_file.write("No incomplete multipart uploads found.\n")
+        else:
+            warning_message = "⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠⚠ Incomplete multipart uploads:\n"
+            log_file.write(warning_message)
+            print(warning_message, end='')
+            for incomplete_upload in incomplete_uploads_list:
+                log_message = f'Key: {incomplete_upload["Key"]}, UploadId: {incomplete_upload["UploadId"]}, Initiated: {incomplete_upload["Initiated"]}\n'
+                log_file.write(log_message)
+                print(log_message, end='')
