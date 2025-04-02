@@ -13,4 +13,5 @@ venv/
 private/
 *.log
 *.log.swp
+.DS_Store
 
